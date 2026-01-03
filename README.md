@@ -3,6 +3,7 @@
 An end-to-end AI application that transcribes podcast audio files and generates structured summaries, key takeaways, and action items. This project leverages **OpenAI's Whisper** for high-accuracy local transcription and **Google Gemini 2.0 Flash** for intelligent content analysis.
 
 ## ✨ Features
+- **YouTube Support:** Simply paste a YouTube video link to analyze podcast content.
 - **Local Transcription:** Uses Whisper (running on your machine) to convert audio to text for free.
 - **AI Summarization:** Utilizes Gemini 2.0 Flash to distill long podcasts into concise summaries.
 - **Structured Key Points:** Automatically extracts bulleted takeaways and actionable advice.
@@ -11,6 +12,7 @@ An end-to-end AI application that transcribes podcast audio files and generates 
 
 ## 🛠️ Tech Stack
 - **Frontend:** [Streamlit](https://streamlit.io/)
+- **Audio Download:** [yt-dlp](https://github.com/yt-dlp/yt-dlp) for YouTube audio extraction
 - **Speech-to-Text:** [OpenAI Whisper](https://github.com/openai/whisper)
 - **LLM Orchestration:** [LangChain](https://www.langchain.com/)
 - **AI Model:** Google Gemini 2.0 Flash (via Google AI Studio)

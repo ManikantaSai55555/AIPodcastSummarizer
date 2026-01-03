@@ -5,3 +5,5 @@ langchain
 langchain_community
 openai-whisper
 ffmpeg-python
+yt-dlp
+tiktoken

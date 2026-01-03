@@ -3,9 +3,10 @@ import tempfile
 import whisper
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Union
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
+import yt_dlp
 
 load_dotenv()
 
@@ -15,12 +16,45 @@ class PodcastAnalysis(BaseModel):
     key_points: List[str] = Field(description="List of 5-8 most important takeaways.")
     action_items: List[str] = Field(description="Specific recommendations or resources mentioned.")
 
-def transcribe_and_summarize(uploaded_file):
-    # Step A: Save the uploaded file to a temporary location
-    # Whisper requires a real file path string to work properly.
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
-        temp_audio.write(uploaded_file.getvalue())
-        temp_path = temp_audio.name
+def download_youtube_audio(youtube_url):
+    """
+    Download audio from YouTube video and save to temporary file.
+    Returns the path to the downloaded audio file.
+    """
+    temp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+    temp_path = temp_audio.name
+    
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'outtmpl': temp_path.replace('.mp3', ''),
+    }
+    
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([youtube_url])
+    
+    return temp_path
+
+def transcribe_and_summarize(uploaded_file_or_url):
+    """
+    Transcribe and summarize audio from either uploaded file or YouTube URL.
+    """
+    # Check if input is a YouTube URL
+    youtube_domains = ['youtube.com', 'youtu.be', 'www.youtube.com']
+    is_youtube = any(domain in str(uploaded_file_or_url) for domain in youtube_domains)
+    
+    if is_youtube:
+        # Download from YouTube
+        temp_path = download_youtube_audio(uploaded_file_or_url)
+    else:
+        # Handle uploaded file (existing logic)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
+            temp_audio.write(uploaded_file_or_url.getvalue())
+            temp_path = temp_audio.name
 
     try:
         # Step B: Local Transcription with Whisper (Free)
